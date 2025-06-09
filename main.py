@@ -1,5 +1,7 @@
 from collections import defaultdict
 import pandas as pd
+import numpy as np
+import heapq
 
 # Grafo ponderado -> lista de adjacências
 class Grafo:
@@ -86,6 +88,76 @@ class Grafo:
             if vertice[0] == v:
                 return vertice[1]
         return None
+    
+    #Usado para calcular o caminho mais curto entre
+    #um vertice e os outros dentro do grafo
+    def dijkstra(self, u):
+        distances = { node : [np.inf, None] for node in self.adj_list.keys()}
+        #Altera o valor para o vertice inicial
+
+
+        distances[u][0] = 0
+        prio_queue = [(distances[u][0], u)]
+        heapq.heapify(prio_queue)
+        while len(prio_queue) > 0:
+            current_distance, current_node = heapq.heappop(prio_queue)
+
+            if current_distance > distances[current_node][0]:
+                continue
+
+            for neighbor, weight in self.adj_list[current_node]:
+                new_distance = current_distance + weight
+
+                if new_distance < distances[neighbor][0]:
+                    distances[neighbor][0] = new_distance
+                    distances[neighbor][1] = current_node
+                    heapq.heappush(prio_queue, (new_distance, neighbor))
+        
+        return distances
+
+
+    def centralidade_proximidade(self, u):
+        if not self.tem_vertice(u):
+            print(f"\nVértice {u} não existe. Não foi possível calcular seu grau.\n")
+            return None
+        
+        #Calcular distâncias dos vértices por dijkstra
+        distances = self.dijkstra(u)
+        sum_distances = 0
+
+        if self.direcionado:
+            #Excluir do calculo vértices não alcançáveis
+            for node in distances.keys():
+                    if distances[node][1] != None and distances[node][0] != np.inf:
+                        sum_distances += 1 / distances[node][0]
+
+
+            #Calculo da centralidade por proximidade no grafo direcionado
+            closeness_centrality = sum_distances / (self.ordem-1)
+            return closeness_centrality
+        
+        else:
+            #Excluir do calculo vértices não alcançáveis
+            for node in distances.keys():
+                    if distances[node][1] != None and distances[node][0] != np.inf:
+                        sum_distances += distances[node][0]
+
+            #Calculo da centralidade por proximidade no grafo não direcionado
+            closeness_centrality = (self.ordem - 1)/(sum_distances)
+            return closeness_centrality
+        
+    def top_10_centralidade_proximidade(self):
+        closeness = {}
+        for node in self.adj_list.keys():
+            closeness[node] = self.centralidade_proximidade(node)
+        
+        sorted_top_10 = sorted(closeness.items(), key=lambda x: x[1], reverse=True)
+        top_10 = sorted_top_10[:10]
+
+        print("\nVértices mais influentes por Proximidade: ")
+        for node, value in top_10:
+            print(f"\t{node} : {value}")
+
 
     def imprime_lista_adjacencias(self):
         print("\n⋅˚₊‧ Lista de adjacências ‧₊˚ ⋅")
@@ -133,3 +205,9 @@ print('Tamanho =', G1.tamanho)
 print('\nGrafo 2 (não direcionado, ator -> ator)')
 print('Ordem = =', G2.ordem)
 print('Tamanho =', G2.tamanho)
+
+print("\n")
+print(G2.centralidade_proximidade("NICOLAS CAGE"))
+print("\n")
+print(G1.centralidade_proximidade("BRYAN CRANSTON"))
+G1.top_10_centralidade_proximidade()
