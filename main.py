@@ -86,6 +86,10 @@ class Grafo:
         else: # se não direcionado
             return len(self.adj_list[u])
 
+    def centralidade_grau(self, v):
+
+        return  self.grau(v) / (self.ordem - 1)
+
     def get_peso(self, u, v): # retorna qual é o peso da aresta entre os vértices u e v do grafo G, caso exista uma aresta entre eles
         for vertice in self.adj_list[u]:
             if vertice[0] == v:
