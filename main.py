@@ -2,6 +2,9 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 import heapq
+from tqdm import tqdm
+from time import sleep
+
 
 # Grafo ponderado -> lista de adjacências
 class Grafo:
@@ -129,7 +132,7 @@ class Grafo:
             #Excluir do calculo vértices não alcançáveis
             for node in distances.keys():
                     if distances[node][1] != None and distances[node][0] != np.inf:
-                        sum_distances += 1 / distances[node][0]
+                        sum_distances += (1 / distances[node][0])
 
 
             #Calculo da centralidade por proximidade no grafo direcionado
@@ -144,11 +147,13 @@ class Grafo:
 
             #Calculo da centralidade por proximidade no grafo não direcionado
             closeness_centrality = (self.ordem - 1)/(sum_distances)
+            if closeness_centrality > 1 or closeness_centrality < 0:
+                closeness_centrality = 0
             return closeness_centrality
         
     def top_10_centralidade_proximidade(self):
         closeness = {}
-        for node in self.adj_list.keys():
+        for node in tqdm(self.adj_list.keys()):
             closeness[node] = self.centralidade_proximidade(node)
         
         sorted_top_10 = sorted(closeness.items(), key=lambda x: x[1], reverse=True)
@@ -203,11 +208,5 @@ print('Ordem =', G1.ordem)
 print('Tamanho =', G1.tamanho)
 
 print('\nGrafo 2 (não direcionado, ator -> ator)')
-print('Ordem = =', G2.ordem)
+print('Ordem =', G2.ordem)
 print('Tamanho =', G2.tamanho)
-
-print("\n")
-print(G2.centralidade_proximidade("NICOLAS CAGE"))
-print("\n")
-print(G1.centralidade_proximidade("BRYAN CRANSTON"))
-G1.top_10_centralidade_proximidade()
