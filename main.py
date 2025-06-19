@@ -155,6 +155,17 @@ class Grafo:
                 closeness_centrality = 0
             return closeness_centrality
         
+    def top_10_centralidade_grau(self):
+        degrees = {}
+        for node in tqdm(self.adj_list.keys()):
+            degrees[node] = self.centralidade_grau(node)
+        
+        sorted_top_10 = sorted(degrees.items(), key=lambda x: x[1], reverse=True)
+        top_10 = sorted_top_10[:10]
+        print("\nVértices mais influentes por Grau: ")
+        for node, value in top_10:
+            print(f"\t{node} : {value}")
+
     def top_10_centralidade_proximidade(self):
         closeness = {}
         for node in tqdm(self.adj_list.keys()):
