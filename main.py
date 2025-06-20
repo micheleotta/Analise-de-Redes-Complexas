@@ -6,6 +6,7 @@ from collections import deque
 import pandas as pd
 import numpy as np
 import heapq
+from tqdm import tqdm
 
 # Grafo ponderado -> lista de adjacências
 class Grafo:
@@ -178,11 +179,11 @@ class Grafo:
         for node, value in top_10:
             print(f"\t{node} : {value}")
             
-    def centralidade_intermediacao(self, u):
+    def centralidade_intermediacao(self, u=None):
         bet = {v: 0.0 for v in self.adj_list}
         vertices = list(self.adj_list.keys())  # lista vertices
         
-        for fonte in vertices:
+        for fonte in tqdm(vertices):
             pilha = []                             # vai guardar a ordem em que visitamos os vértices
             pais = {v: [] for v in vertices}       # para cada vértice, quem são seus "pais" no caminho mais curto
             caminhos = {v: 0.0 for v in vertices}  # quantos caminhos mais curtos existem até cada vértice
@@ -233,12 +234,12 @@ class Grafo:
             for v in bet:
                 bet[v] *= escala
 
-        if not self.tem_vertice(u):
+        if u is None:         
+            return bet
+        if not self.tem_vertice(u):   
             print(f"Vértice '{u}' não existe no grafo")
             return None
-            
-        return bet[u]
-    
+        return bet[u]      
     
     def top_10_centralidade_intermediacao(self):
         bet = self.centralidade_intermediacao()          
@@ -248,6 +249,7 @@ class Grafo:
         print("\nVértices mais influentes por Intermediação: ")
         for node, value in sorted_top_10:
             print(f"\t{node} : {value}")
+    
 
     def dfs(self, source_node):
       visited = []
