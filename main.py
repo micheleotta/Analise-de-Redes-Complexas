@@ -188,82 +188,6 @@ class Grafo:
             print()
         print("\n")
         return ""
-    
-
-    def componentes_fortemente_conexos(self):
-        def dfs_pilha(v, visitado, pilha):
-            visitado.add(v)
-            for vizinho, _ in self.adj_list[v]:
-                if vizinho not in visitado:
-                    dfs_pilha(vizinho, visitado, pilha)
-            pilha.append(v)
-
-        def dfs_buscar_componente(v, visitado, componente, transposto):
-            visitado.add(v)
-            componente.add(v)
-            for vizinho, _ in transposto[v]:
-                if vizinho not in visitado:
-                    dfs_buscar_componente(vizinho, visitado, componente, transposto)
-
-        # Etapa 1: Preenche pilha
-        visitado = set()
-        pilha = []
-        for v in self.adj_list:
-            if v not in visitado:
-                dfs_pilha(v, visitado, pilha)
-
-        # Etapa 2: Transpoe o grafo
-        transposto = {v: [] for v in self.adj_list}
-        for u in self.adj_list:
-            for v, _ in self.adj_list[u]:
-                transposto[v].append((u, 1))
-
-        # Etapa 3: Fazer DFS no grafo transposto seguindo a ordem da pilha
-        visitado.clear()
-        componentes = []
-        while pilha:
-            v = pilha.pop()
-            if v not in visitado:
-                componente = set()
-                dfs_buscar_componente(v, visitado, componente, transposto)
-                componentes.append(componente)
-
-        return componentes
-    
-    
-    def _dfs_busca_iterativa(self, source_node):
-        visited = []
-        stack = [source_node]
-
-        while stack:
-            element = stack.pop()
-            if element not in visited:
-                visited.append(element)
-                for adj, _ in sorted(self.adj_list[element], reverse=True):
-                    if adj not in visited:
-                        stack.append(adj)
-        return visited
-
-    def dfs_iterativa(self):
-            visitado = set()
-            componentes = []
-
-            for v in self.adj_list:
-                if v not in visitado:
-                    componente = set(self._dfs_busca_iterativa(v))
-                    visitado.update(componente)
-                    componentes.append(componente)
-
-            return componentes
-
-
-
-
-
-
-
-
-
 
 
 # ler o dataset
@@ -298,31 +222,6 @@ print('Grafo 1 (direcionado, ator -> diretor)')
 print('Ordem =', G1.ordem)
 print('Tamanho =', G1.tamanho)
 
-componentes_g1 = G1.componentes_fortemente_conexos()
-componentes_g2 = G2.dfs_iterativa()
-
-with open("componentes_G1.txt", "w", encoding="utf-8") as f:
-    for i, componente in enumerate(componentes_g1, start=1):
-        f.write(f"Componente {i} (tamanho {len(componente)}): {sorted(componente)}\n")
-
-print(f"Total de componentes fortemente conexos no G1: {len(componentes_g1)}\n")
-
-
-
 print('\nGrafo 2 (não direcionado, ator -> ator)')
 print('Ordem =', G2.ordem)
 print('Tamanho =', G2.tamanho)
-
-with open("componentes_G2.txt", "w", encoding="utf-8") as f:
-    for i, componente in enumerate(componentes_g2, start=1):
-        f.write(f"Componente {i} (tamanho {len(componente)}): {sorted(componente)}\n")
-
-print(f"Total de componentes conexos em G2: {len(componentes_g2)}")
-
-
-
-
-
-
-
-
