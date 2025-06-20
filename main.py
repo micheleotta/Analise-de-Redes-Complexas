@@ -102,7 +102,6 @@ class Grafo:
         distances = { node : [np.inf, None] for node in self.adj_list.keys()}
         #Altera o valor para o vertice inicial
 
-
         distances[u][0] = 0
         prio_queue = [(distances[u][0], u)]
         heapq.heapify(prio_queue)
@@ -122,12 +121,13 @@ class Grafo:
 
         return distances
 
+    def centralidade_grau(self, v):
+        return  self.grau(v) / (self.ordem - 1)
 
     def centralidade_proximidade(self, u):
         if not self.tem_vertice(u):
             print(f"\nVértice {u} não existe. Não foi possível calcular seu grau.\n")
             return None
-
         #Calcular distâncias dos vértices por dijkstra
         distances = self.dijkstra(u)
         sum_distances = 0
@@ -137,8 +137,6 @@ class Grafo:
             for node in distances.keys():
                     if distances[node][1] != None and distances[node][0] != np.inf:
                         sum_distances += 1 / distances[node][0]
-
-
             #Calculo da centralidade por proximidade no grafo direcionado
             closeness_centrality = sum_distances / (self.ordem-1)
             return closeness_centrality
@@ -148,10 +146,22 @@ class Grafo:
             for node in distances.keys():
                     if distances[node][1] != None and distances[node][0] != np.inf:
                         sum_distances += distances[node][0]
-
             #Calculo da centralidade por proximidade no grafo não direcionado
             closeness_centrality = (self.ordem - 1)/(sum_distances)
+            if closeness_centrality > 1 or closeness_centrality < 0:
+                closeness_centrality = 0
             return closeness_centrality
+    
+    def top_10_centralidade_grau(self):
+        degrees = {}
+        for node in self.adj_list.keys():
+            degrees[node] = self.centralidade_grau(node)
+        
+        sorted_top_10 = sorted(degrees.items(), key=lambda x: x[1], reverse=True)
+        top_10 = sorted_top_10[:10]
+        print("\nVértices mais influentes por Grau: ")
+        for node, value in top_10:
+            print(f"\t{node} : {value}")
 
     def top_10_centralidade_proximidade(self):
         closeness = {}
