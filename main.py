@@ -271,6 +271,7 @@ class Grafo:
       return visited
 
     def arvore_geradora_minima(self, x):
+        
         if self.direcionado:
             print("O Algoritmo de Kruskal deve ser executado apenas em grafos não-direcionados.")
             return None
@@ -279,11 +280,11 @@ class Grafo:
             print(f"Vértice '{x}' não existe no grafo.")
             return None
 
-        # Passo 1: Encontrar os componente que possui x e as arestas a serem adicionadas
+        # Passo 1: Encontrar a componente que possui x e as arestas a serem adicionadas
         arestas_de_agm = set()
-        componentes_de_x = self.dfs(x)
+        componente_de_x = self.dfs(x)
 
-        for vertice in componentes_de_x:
+        for vertice in componente_de_x:
             for vizinho, peso in self.adj_list[vertice]:
                 aresta = (min(vertice, vizinho), max(vertice,vizinho), peso)
                 arestas_de_agm.add(aresta)
@@ -306,7 +307,7 @@ class Grafo:
             # Faz DFS na AGM a partir de um dos vértices
             visitados = AGM.dfs(vertice)
 
-            if vizinho not in visitados:
+            if vizinho not in visitados: # Se o vizinho já estiver nos nós visitados
                 AGM.adiciona_aresta(vertice, vizinho)
                 AGM.adj_list[vertice][-1] = (vizinho, peso)
                 AGM.adj_list[vizinho][-1] = (vertice, peso)
