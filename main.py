@@ -414,7 +414,8 @@ print('Tamanho =', G2.tamanho)
 # Árvore Geradora Mínima do componente x
 x = "BETHANY RISHELL"
 AGM, custo_total = G2.arvore_geradora_minima(x)
-print(f"Árvore Geradora Mínima da componente que contém {x}: \n{AGM.imprime_lista_adjacencias()}")
+print(f"\nÁrvore Geradora Mínima da componente que contém {x}: \n")
+print(AGM.imprime_lista_adjacencias())
 print(f"Custo Total da Árvore Geradora Mínima: {custo_total}")
 
 # Quantidade de componentes
