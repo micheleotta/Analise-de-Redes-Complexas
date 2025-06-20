@@ -174,6 +174,72 @@ class Grafo:
         print("\nVértices mais influentes por Proximidade: ")
         for node, value in top_10:
             print(f"\t{node} : {value}")
+            
+    def centralidade_intermediacao(self):
+        bet = {v: 0.0 for v in self.adj_list}
+        vertices = list(self.adj_list.keys())  # lista vertices
+        
+        for fonte in vertices:
+            pilha = []                             # vai guardar a ordem em que visitamos os vértices
+            pais = {v: [] for v in vertices}       # para cada vértice, quem são seus "pais" no caminho mais curto
+            caminhos = {v: 0.0 for v in vertices}  # quantos caminhos mais curtos existem até cada vértice
+            caminhos[fonte] = 1.0                  # da fonte para ela mesma, sempre há exatamente 1 caminho
+            dist = {v: np.inf for v in vertices}   # distância mais curta conhecida até cada vértice
+            dist[fonte] = 0                        # a distância da fonte para ela mesma é zero
+            fila = [(0, fonte)]                    # fila de prioridade: (distância, vértice)
+            
+            # dijkstra modificado
+            while fila:
+                d, v = heapq.heappop(fila)
+                
+                if d > dist[v]:
+                    continue
+                
+                pilha.append(v)
+                
+                for w, peso in self.adj_list[v]:
+                    nova_dist = dist[v] + peso
+                    
+                    if nova_dist < dist[w]:        
+                        dist[w] = nova_dist
+                        heapq.heappush(fila, (nova_dist, w))
+                        caminhos[w] = caminhos[v]  
+                        pais[w] = [v]              
+                        
+                    elif nova_dist == dist[w]:     
+                        caminhos[w] += caminhos[v] 
+                        pais[w].append(v)          
+            
+            # brandes    
+            dep = {v: 0.0 for v in vertices}
+           
+            while pilha:
+                w = pilha.pop()
+                
+                for v in pais[w]:
+                    if caminhos[w]:
+                        fração = (caminhos[v] / caminhos[w]) * (1 + dep[w])
+                        dep[v] += fração
+                
+                if w != fonte:
+                    bet[w] += dep[w]
+       
+        n = self.ordem
+        if n > 2:
+            escala = (1 if self.direcionado else 2) / ((n - 1) * (n - 2))
+            for v in bet:
+                bet[v] *= escala
+        return bet
+    
+    
+    def top_10_centralidade_intermediacao(self):
+        bet = self.centralidade_intermediacao()          
+        sorted_top_10 = sorted(bet.items(),              
+                               key=lambda x: x[1],
+                               reverse=True)[:10]
+        print("\nVértices mais influentes por Intermediação: ")
+        for node, value in sorted_top_10:
+            print(f"\t{node} : {value}")
 
     def dfs(self, source_node):
       visited = []
