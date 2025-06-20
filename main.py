@@ -1,3 +1,6 @@
+# Grupo 6 - Ana Flávia Martins dos Santos, Fabrício Góes Pinterich, Isabella Vanderlinde Berkembrock
+# Leonardo Min Woo Chung, Michele Cristina Otta e Phillip Wan Tcha Yan
+
 from collections import defaultdict
 from collections import deque
 import pandas as pd
@@ -373,7 +376,6 @@ class Grafo:
 df = pd.read_csv('netflix_amazon_disney_titles.csv')
 df = df[['director', 'cast']]
 df.dropna(subset=['director', 'cast'], inplace=True) # ignorar entradas vazias
-df.head()
 
 # formato padronizado dos nomes
 def padronizar_string(string):
@@ -396,6 +398,15 @@ for id, cast in enumerate(df['cast']):
         # adicionar grafo não direcionado relação entre atores
         for i in range(id_a + 1, len(actors)):
             G2.adiciona_aresta(actor, actors[i])
+
+# retornar quantidade vértices e arestas
+print('Grafo 1 (direcionado, ator -> diretor)')
+print('Ordem =', G1.ordem)
+print('Tamanho =', G1.tamanho)
+
+print('\nGrafo 2 (não direcionado, ator -> ator)')
+print('Ordem = =', G2.ordem)
+print('Tamanho =', G2.tamanho)
 
 # Árvore Geradora Mínima do componente x
 x = "BOB ODENKIRK"
