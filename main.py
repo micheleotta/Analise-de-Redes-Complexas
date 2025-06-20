@@ -268,6 +268,32 @@ class Grafo:
 
       return visited
 
+    def dsu(self, vertices): # Disjoint Set Union 
+        parent = {v: v for v in vertices} # Cada vértice começa sendo seu próprio líder
+        rank = {v: 0 for v in vertices} # Controla a altura das árvores
+
+        def find(v):
+            if parent[v] != v: # Se o vértice não é seu próprio representante
+                parent[v] = find(parent[v]) # Recursivamente, procura o líder do vértice
+            return parent[v]
+
+        def union(u, v):
+            pu, pv = find(u), find(v) # Encontra os representantes dos vértices u e v
+
+            if pu == pv: # Se possuem o mesmo representante, estão no mesmo grupo
+                return False # Não pode unir porque há um ciclo
+
+            if rank[pu] < rank[pv]: # Senão, faza união dos conjuntos (árvore com menor altura vai para baixo na maior)
+                parent[pv] = pu
+            else:
+              parent[pv] = pu
+              if rank[pu] == rank[pv]: # Se os ranks forem iguais, aumenta o rank do novo root
+                rank[pu] += 1
+
+            return True # Realizou a união
+
+        return find, union # Retorna as funções internas
+
     def arvore_geradora_minima(self, x):
         if self.direcionado:
             print("O Algoritmo de Kruskal deve ser executado apenas em grafos não-direcionados.")
@@ -278,39 +304,36 @@ class Grafo:
             return None
 
         # Passo 1: Encontrar os componente que possui x e as arestas a serem adicionadas
-        arestas_de_agm = []
+        arestas_de_agm = set()
         componentes_de_x = self.dfs(x)
 
         for vertice in componentes_de_x:
             for vizinho, peso in self.adj_list[vertice]:
-                if ((vertice, vizinho, peso) not in arestas_de_agm) and ((vizinho, vertice, peso) not in arestas_de_agm):
-                    arestas_de_agm.append((vertice, vizinho, peso))
+                aresta = (min(vertice, vizinho), max(vertice, vizinho), peso)
+                arestas_de_agm.add(aresta)
 
-        
         # Passo 2: Começar com uma Árvore Vazia
         AGM = Grafo(False)
         custo_total = 0
 
         # Passo 3: Ordenar todos os vértices pelo peso
+        arestas_de_agm = list(arestas_de_agm)
         arestas_de_agm.sort(key=lambda x: x[2])
 
         # Passo 4: Pega a aresta menor, checa se forma um ciclo com a árvore vazia. Se um ciclo é formado, inclui a aresta. Senão, descarta
         # Repetir o passo 4 até que  o número de arestas seja igual a (V - 1)
-        
-        while arestas_de_agm:
-            vertice, vizinho, peso = arestas_de_agm.pop(0)
-            
-            # Faz DFS na AGM a partir de um dos vértices
-            visitados = AGM.dfs(vertice)
 
-            if vizinho not in visitados:
+        _, union = self.dsu(componentes_de_x)  # Inicializa o Union-Find
+        
+        for vertice, vizinho, peso in arestas_de_agm:
+            if union(vertice, vizinho):
                 AGM.adiciona_aresta(vertice, vizinho)
                 AGM.adj_list[vertice][-1] = (vizinho, peso)
                 AGM.adj_list[vizinho][-1] = (vertice, peso)
-                custo_total += peso 
+                custo_total += peso
 
-            if AGM.tamanho == AGM.ordem - 1:
-                break
+                if AGM.tamanho == AGM.ordem - 1:
+                    break
 
         return AGM, custo_total
 
