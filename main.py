@@ -1,10 +1,8 @@
 from collections import defaultdict
+from collections import deque
 import pandas as pd
 import numpy as np
 import heapq
-from tqdm import tqdm
-from time import sleep
-
 
 # Grafo ponderado -> lista de adjacências
 class Grafo:
@@ -58,6 +56,12 @@ class Grafo:
             return True
         return False
 
+    def tem_aresta(self, u, v): # verifica se a aresta entre os vértices u e v existe no grafo G e retorna True ou False.
+        for aresta in self.adj_list[u]:
+            if aresta[0] == v:
+                return True
+        return False
+
     def grau_entrada(self, u): # retorna a quantidade total de arestas que chegam até o vértice u do grafo G.
         if not self.tem_vertice(u):
             print(f"\nVértice {u} não existe. Não foi possível calcular o grau de entrada.\n")
@@ -80,22 +84,18 @@ class Grafo:
         if not self.tem_vertice(u):
             print(f"\nVértice {u} não existe. Não foi possível calcular seu grau.\n")
             return None
-    
+
         if self.direcionado:
             return self.grau_entrada(u) + self.grau_saida(u)
         else: # se não direcionado
             return len(self.adj_list[u])
-
-    def centralidade_grau(self, v):
-
-        return  self.grau(v) / (self.ordem - 1)
 
     def get_peso(self, u, v): # retorna qual é o peso da aresta entre os vértices u e v do grafo G, caso exista uma aresta entre eles
         for vertice in self.adj_list[u]:
             if vertice[0] == v:
                 return vertice[1]
         return None
-    
+
     #Usado para calcular o caminho mais curto entre
     #um vertice e os outros dentro do grafo
     def dijkstra(self, u):
@@ -119,7 +119,7 @@ class Grafo:
                     distances[neighbor][0] = new_distance
                     distances[neighbor][1] = current_node
                     heapq.heappush(prio_queue, (new_distance, neighbor))
-        
+
         return distances
 
 
@@ -127,7 +127,7 @@ class Grafo:
         if not self.tem_vertice(u):
             print(f"\nVértice {u} não existe. Não foi possível calcular seu grau.\n")
             return None
-        
+
         #Calcular distâncias dos vértices por dijkstra
         distances = self.dijkstra(u)
         sum_distances = 0
@@ -136,13 +136,13 @@ class Grafo:
             #Excluir do calculo vértices não alcançáveis
             for node in distances.keys():
                     if distances[node][1] != None and distances[node][0] != np.inf:
-                        sum_distances += (1 / distances[node][0])
+                        sum_distances += 1 / distances[node][0]
 
 
             #Calculo da centralidade por proximidade no grafo direcionado
             closeness_centrality = sum_distances / (self.ordem-1)
             return closeness_centrality
-        
+
         else:
             #Excluir do calculo vértices não alcançáveis
             for node in distances.keys():
@@ -151,26 +151,13 @@ class Grafo:
 
             #Calculo da centralidade por proximidade no grafo não direcionado
             closeness_centrality = (self.ordem - 1)/(sum_distances)
-            if closeness_centrality > 1 or closeness_centrality < 0:
-                closeness_centrality = 0
             return closeness_centrality
-        
-    def top_10_centralidade_grau(self):
-        degrees = {}
-        for node in tqdm(self.adj_list.keys()):
-            degrees[node] = self.centralidade_grau(node)
-        
-        sorted_top_10 = sorted(degrees.items(), key=lambda x: x[1], reverse=True)
-        top_10 = sorted_top_10[:10]
-        print("\nVértices mais influentes por Grau: ")
-        for node, value in top_10:
-            print(f"\t{node} : {value}")
 
     def top_10_centralidade_proximidade(self):
         closeness = {}
-        for node in tqdm(self.adj_list.keys()):
+        for node in self.adj_list.keys():
             closeness[node] = self.centralidade_proximidade(node)
-        
+
         sorted_top_10 = sorted(closeness.items(), key=lambda x: x[1], reverse=True)
         top_10 = sorted_top_10[:10]
 
@@ -178,9 +165,72 @@ class Grafo:
         for node, value in top_10:
             print(f"\t{node} : {value}")
 
+    def dfs(self, source_node):
+      visited = []
+      stack = []
+
+      stack.append(source_node)
+
+      while len(stack) > 0:
+        element = stack.pop()
+
+        if element not in visited:
+          visited.append(element)
+
+          for adj, _ in sorted(self.adj_list[element], reverse=True):
+
+            if adj not in visited:
+              stack.append(adj)
+
+      return visited
+
+    def arvore_geradora_minima(self, x):
+        if self.direcionado:
+            print("O Algoritmo de Kruskal deve ser executado apenas em grafos não-direcionados.")
+            return None
+
+        if not self.tem_vertice(x):
+            print(f"Vértice '{x}' não existe no grafo.")
+            return None
+
+        # Passo 1: Encontrar os componente que possui x e as arestas a serem adicionadas
+        arestas_de_agm = []
+        componentes_de_x = self.dfs(x)
+
+        for vertice in componentes_de_x:
+            for vizinho, peso in self.adj_list[vertice]:
+                if ((vertice, vizinho, peso) not in arestas_de_agm) and ((vizinho, vertice, peso) not in arestas_de_agm):
+                    arestas_de_agm.append((vertice, vizinho, peso))
+
+        
+        # Passo 2: Começar com uma Árvore Vazia
+        AGM = Grafo(False)
+        custo_total = 0
+
+        # Passo 3: Ordenar todos os vértices pelo peso
+        arestas_de_agm.sort(key=lambda x: x[2])
+
+        # Passo 4: Pega a aresta menor, checa se forma um ciclo com a árvore vazia. Se um ciclo é formado, inclui a aresta. Senão, descarta
+        # Repetir o passo 4 até que  o número de arestas seja igual a (V - 1)
+        
+        while arestas_de_agm:
+            vertice, vizinho, peso = arestas_de_agm.pop(0)
+            
+            # Faz DFS na AGM a partir de um dos vértices
+            visitados = AGM.dfs(vertice)
+
+            if vizinho not in visitados:
+                AGM.adiciona_aresta(vertice, vizinho)
+                AGM.adj_list[vertice][-1] = (vizinho, peso)
+                AGM.adj_list[vizinho][-1] = (vertice, peso)
+                custo_total += peso 
+
+            if AGM.tamanho == self.ordem - 1:
+                break
+
+        return AGM, custo_total
 
     def imprime_lista_adjacencias(self):
-        print("\n⋅˚₊‧ Lista de adjacências ‧₊˚ ⋅")
         for vertice in self.adj_list:
             print(f"{vertice}: ", end="")
             for adjacente in self.adj_list[vertice]:
