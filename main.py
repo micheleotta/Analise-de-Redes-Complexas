@@ -368,6 +368,7 @@ class Grafo:
 
         return componentes
 
+
 # ler o dataset
 df = pd.read_csv('netflix_amazon_disney_titles.csv')
 df = df[['director', 'cast']]
@@ -385,11 +386,11 @@ G2 = Grafo(False) # grafo não direcionado
 for id, cast in enumerate(df['cast']):
     actors_list = cast.split(', ')
     actors = [padronizar_string(actor) for actor in actors_list]
+    director_list = (df['director'].iloc[id]).split(', ')
+    directors = [padronizar_string(director) for director in director_list]
     for id_a, actor in enumerate(actors):
         # adicionar no grafo direcionado(actor, director)
         # actor -> director
-        director_list = (df['director'].iloc[id]).split(', ')
-        directors = [padronizar_string(director) for director in director_list]
         for director in (directors):
             G1.adiciona_aresta(actor, director)
         # adicionar grafo não direcionado relação entre atores
