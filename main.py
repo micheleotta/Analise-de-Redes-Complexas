@@ -175,7 +175,7 @@ class Grafo:
         for node, value in top_10:
             print(f"\t{node} : {value}")
             
-    def centralidade_intermediacao(self):
+    def centralidade_intermediacao(self, u):
         bet = {v: 0.0 for v in self.adj_list}
         vertices = list(self.adj_list.keys())  # lista vertices
         
@@ -229,7 +229,12 @@ class Grafo:
             escala = (1 if self.direcionado else 2) / ((n - 1) * (n - 2))
             for v in bet:
                 bet[v] *= escala
-        return bet
+
+        if not self.tem_vertice(u):
+            print(f"Vértice '{u}' não existe no grafo")
+            return None
+            
+        return bet[u]
     
     
     def top_10_centralidade_intermediacao(self):
@@ -362,10 +367,6 @@ class Grafo:
                 componentes.append(componente)
 
         return componentes
-
-
-        
-
 
 # ler o dataset
 df = pd.read_csv('netflix_amazon_disney_titles.csv')
