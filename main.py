@@ -306,7 +306,7 @@ class Grafo:
                 AGM.adj_list[vizinho][-1] = (vertice, peso)
                 custo_total += peso 
 
-            if AGM.tamanho == self.ordem - 1:
+            if AGM.tamanho == AGM.ordem - 1:
                 break
 
         return AGM, custo_total
