@@ -251,7 +251,7 @@ class Grafo:
         element = stack.pop()
 
         if element not in visited:
-          visited.append(element)
+          visited.append(element) 
 
           for adj, _ in sorted(self.adj_list[element], reverse=True):
 
@@ -314,6 +314,57 @@ class Grafo:
             print()
         print("\n")
         return ""
+    
+    def componentes_conexas(self):
+        visited = set()
+        componentes = []
+
+        for vertice in self.adj_list.keys():
+            if vertice not in visited:
+                componente = self.dfs(vertice)
+                componentes.append(componente)
+                visited.update(componente)
+
+        return componentes
+
+    def kosaraju(self):
+        def dfs(v, visited, estrutura, grafo, modo):
+            visited.add(v)
+            for vizinho, _ in grafo[v]:
+                if vizinho not in visited:
+                    dfs(vizinho, visited, estrutura, grafo, modo)
+            if modo == 'pilha':
+                estrutura.append(v)
+            elif modo == 'componente':
+                estrutura.add(v)
+
+        # Etapa 1: DFS no grafo original
+        visited = set()
+        pilha = []
+        for v in self.adj_list:
+            if v not in visited:
+                dfs(v, visited, pilha, self.adj_list, 'pilha')
+
+        # Etapa 2: transpor o grafo
+        transposto = {v: [] for v in self.adj_list}
+        for u in self.adj_list:
+            for v, _ in self.adj_list[u]:
+                transposto[v].append((u, 1))
+
+        # Etapa 3: DFS no grafo transposto
+        visited.clear()
+        componentes = []
+        while pilha:
+            v = pilha.pop()
+            if v not in visited:
+                componente = set()
+                dfs(v, visited, componente, transposto, 'componente')
+                componentes.append(componente)
+
+        return componentes
+
+
+        
 
 
 # ler o dataset
@@ -344,10 +395,23 @@ for id, cast in enumerate(df['cast']):
         for i in range(id_a + 1, len(actors)):
             G2.adiciona_aresta(actor, actors[i])
 
+
+componentes_g1 = G1.kosaraju() 
+componentes_g2 = G2.componentes_conexas()  
+
 print('Grafo 1 (direcionado, ator -> diretor)')
 print('Ordem =', G1.ordem)
 print('Tamanho =', G1.tamanho)
+print(f"Quantidade de componentes fortemente conexas em G1: {len(componentes_g1)}")
+with open("componentes_G1.txt", "w", encoding="utf-8") as f:
+    for i, comp in enumerate(componentes_g1, start=1):
+        f.write(f"Componente {i} (tamanho {len(comp)}): {sorted(comp)}\n")
+
 
 print('\nGrafo 2 (não direcionado, ator -> ator)')
 print('Ordem =', G2.ordem)
 print('Tamanho =', G2.tamanho)
+print(f"Quantidade de componentes conexas em G2: {len(componentes_g2)}")
+with open("componentes_G2.txt", "w", encoding="utf-8") as f:
+    for i, comp in enumerate(componentes_g2, start=1):
+        f.write(f"Componente {i} (tamanho {len(comp)}): {sorted(comp)}\n")
