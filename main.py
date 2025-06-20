@@ -396,7 +396,13 @@ for id, cast in enumerate(df['cast']):
         for i in range(id_a + 1, len(actors)):
             G2.adiciona_aresta(actor, actors[i])
 
+# Árvore Geradora Mínima do componente x
+x = "BOB ODENKIRK"
+AGM, custo_total = G2.arvore_geradora_minima(x)
+print(f"Árvore Geradora Mínima da componente que contém {x}: \n{AGM.imprime_lista_adjacencias()}")
+print(f"Custo Total da Árvore Geradora Mínima: {custo_total}")
 
+# Quantidade de componentes
 componentes_g1 = G1.kosaraju() 
 componentes_g2 = G2.componentes_conexas()  
 
