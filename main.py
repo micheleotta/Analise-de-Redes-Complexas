@@ -232,6 +232,8 @@ class Grafo:
         if n > 2:
             escala = (1 if self.direcionado else 2) / ((n - 1) * (n - 2))
             for v in bet:
+                if not self.direcionado:
+                    bet[v] /= 2
                 bet[v] *= escala
 
         if u is None:         
