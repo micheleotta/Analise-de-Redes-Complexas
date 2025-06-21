@@ -409,7 +409,7 @@ print('Ordem =', G1.ordem)
 print('Tamanho =', G1.tamanho)
 
 print('\nGrafo 2 (não direcionado, ator -> ator)')
-print('Ordem = =', G2.ordem)
+print('Ordem =', G2.ordem)
 print('Tamanho =', G2.tamanho)
 
 # Árvore Geradora Mínima do componente x
